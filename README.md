@@ -27,8 +27,9 @@ internos também mudaram. Num site que já estava publicado, faça isto na Netli
    crie `DIGITALIZE_USERNAME`, `DIGITALIZE_PASSWORD_SALT` e
    `DIGITALIZE_PASSWORD_HASH` com os **mesmos valores** de `DIGIKOF_USERNAME`,
    `DIGIKOF_PASSWORD_SALT` e `DIGIKOF_PASSWORD_HASH` (a senha continua a mesma).
-   Depois apague as três `DIGIKOF_*`. Sem as novas variáveis, o login responde
-   "Autenticação não configurada no servidor".
+   Depois apague as três `DIGIKOF_*`. Enquanto as `DIGITALIZE_*` não existirem,
+   o login continua funcionando com as `DIGIKOF_*` (compatibilidade temporária
+   em `src/auth.js`, que pode ser removida depois da troca).
 2. **Novo deploy** depois de trocar as variáveis (Deploys → Trigger deploy).
 3. **Dados:** pastas e documentos ficam nos stores `digitalize-meta` e
    `digitalize-files`. O que foi salvo antes continua nos stores antigos

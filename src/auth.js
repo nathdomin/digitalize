@@ -44,13 +44,26 @@ export function hashPassword(password, saltHex) {
 // Compara a senha recebida com o hash configurado nas variáveis de ambiente.
 // Lança erro se o servidor não tiver sido configurado (evita "logar" por acidente
 // com uma verificação sempre-falsa silenciosa).
+// Transição do nome antigo (DigiKof): se as variáveis DIGITALIZE_* ainda não
+// existirem na Netlify, usa as DIGIKOF_*. O trio é lido sempre do mesmo
+// prefixo, para nunca misturar o salt de um com o hash do outro. Quando as
+// DIGITALIZE_* estiverem criadas, este fallback pode ser removido.
+function credentialsFromEnv() {
+  for (const prefix of ['DIGITALIZE', 'DIGIKOF']) {
+    const user = process.env[prefix + '_USERNAME'];
+    const salt = process.env[prefix + '_PASSWORD_SALT'];
+    const hash = process.env[prefix + '_PASSWORD_HASH'];
+    if (user && salt && hash) return { expectedUser: user, salt, expectedHash: hash };
+  }
+  return null;
+}
+
 export function verifyCredentials(username, password) {
-  const expectedUser = process.env.DIGITALIZE_USERNAME;
-  const salt = process.env.DIGITALIZE_PASSWORD_SALT;
-  const expectedHash = process.env.DIGITALIZE_PASSWORD_HASH;
-  if (!expectedUser || !salt || !expectedHash) {
+  const creds = credentialsFromEnv();
+  if (!creds) {
     throw new Error('Autenticação não configurada no servidor (variáveis de ambiente ausentes).');
   }
+  const { expectedUser, salt, expectedHash } = creds;
   if (username !== expectedUser) return false;
 
   const computed = Buffer.from(hashPassword(password, salt), 'hex');
