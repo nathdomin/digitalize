@@ -4,3 +4,16 @@
 
 [functions]
   node_bundler = "esbuild"
+
+# Cabeçalhos de segurança para o site estático.
+# - style-src 'unsafe-inline': o app usa atributos style="" e el.style.
+# - img-src data:/blob:: o processamento da foto carrega a imagem via data URL.
+# - camera=(self): a captura usa <input capture>, que depende da câmera.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "same-origin"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=()"

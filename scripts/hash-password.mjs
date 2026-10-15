@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Gera as credenciais para configurar o login do DigiKof.
+// Gera as credenciais para configurar o login do Digitalize.
 // Uso:  node scripts/hash-password.mjs "a-senha-que-voce-quer-usar"
 //
 // A senha em si NUNCA é salva em lugar nenhum — só o hash. Guarde a senha
@@ -21,7 +21,7 @@ const salt = randomBytes(16).toString('hex');
 const hash = pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 32, 'sha256').toString('hex');
 
 console.log('\nAdicione estas 3 variáveis em Netlify → Site settings → Environment variables:\n');
-console.log('DIGIKOF_USERNAME=escolha-um-usuario');
-console.log('DIGIKOF_PASSWORD_SALT=' + salt);
-console.log('DIGIKOF_PASSWORD_HASH=' + hash);
+console.log('DIGITALIZE_USERNAME=escolha-um-usuario');
+console.log('DIGITALIZE_PASSWORD_SALT=' + salt);
+console.log('DIGITALIZE_PASSWORD_HASH=' + hash);
 console.log('\nDepois de adicionar, faça um novo deploy para as funções lerem os valores novos.\n');

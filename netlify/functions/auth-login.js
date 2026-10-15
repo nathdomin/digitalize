@@ -4,10 +4,11 @@ import {
   registerFailedAttempt,
   clearAttempts,
   createSession,
-  sessionCookieHeader
+  sessionCookieHeader,
+  clientIp
 } from '../../src/auth.js';
 
-export default async (request) => {
+export default async (request, context) => {
   try {
     if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
@@ -18,7 +19,8 @@ export default async (request) => {
       return Response.json({ error: 'Informe usuário e senha.' }, { status: 400 });
     }
 
-    const lockedSeconds = await checkLockout(username);
+    const ip = clientIp(request, context);
+    const lockedSeconds = await checkLockout(ip);
     if (lockedSeconds > 0) {
       return Response.json(
         { error: `Muitas tentativas incorretas. Tente novamente em ${Math.ceil(lockedSeconds / 60)} min.` },
@@ -35,11 +37,11 @@ export default async (request) => {
     }
 
     if (!valid) {
-      await registerFailedAttempt(username);
+      await registerFailedAttempt(ip);
       return Response.json({ error: 'Usuário ou senha incorretos.' }, { status: 401 });
     }
 
-    await clearAttempts(username);
+    await clearAttempts(ip);
     const { token, expiresAt } = await createSession(username);
     const isHttps = new URL(request.url).protocol === 'https:';
     const maxAge = Math.floor((expiresAt - Date.now()) / 1000);

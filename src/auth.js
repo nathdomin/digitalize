@@ -10,17 +10,17 @@
 import { randomBytes, pbkdf2Sync, timingSafeEqual } from 'node:crypto';
 import { getStore } from '@netlify/blobs';
 
-const SESSION_COOKIE = 'digikof_session';
+const SESSION_COOKIE = 'digitalize_session';
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12h
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000; // 15min
 const PBKDF2_ITERATIONS = 100000;
 
 function sessionsStore() {
-  return getStore({ name: 'digikof-sessions', consistency: 'strong' });
+  return getStore({ name: 'digitalize-sessions', consistency: 'strong' });
 }
 function securityStore() {
-  return getStore({ name: 'digikof-security', consistency: 'strong' });
+  return getStore({ name: 'digitalize-security', consistency: 'strong' });
 }
 
 export function parseCookies(request) {
@@ -45,9 +45,9 @@ export function hashPassword(password, saltHex) {
 // Lança erro se o servidor não tiver sido configurado (evita "logar" por acidente
 // com uma verificação sempre-falsa silenciosa).
 export function verifyCredentials(username, password) {
-  const expectedUser = process.env.DIGIKOF_USERNAME;
-  const salt = process.env.DIGIKOF_PASSWORD_SALT;
-  const expectedHash = process.env.DIGIKOF_PASSWORD_HASH;
+  const expectedUser = process.env.DIGITALIZE_USERNAME;
+  const salt = process.env.DIGITALIZE_PASSWORD_SALT;
+  const expectedHash = process.env.DIGITALIZE_PASSWORD_HASH;
   if (!expectedUser || !salt || !expectedHash) {
     throw new Error('Autenticação não configurada no servidor (variáveis de ambiente ausentes).');
   }
@@ -59,17 +59,33 @@ export function verifyCredentials(username, password) {
   return timingSafeEqual(computed, expected);
 }
 
-export async function checkLockout(username) {
-  const record = await securityStore().get('attempts:' + username, { type: 'json' });
+// O bloqueio por tentativas é por IP de origem, não por usuário: como só
+// existe um usuário, bloquear por nome deixaria qualquer pessoa trancar o app
+// inteiro errando a senha 5 vezes. Por IP, quem erra só bloqueia a si mesmo.
+// (Também evita criar um registro novo para cada nome de usuário inventado.)
+export function clientIp(request, context) {
+  return (
+    (context && context.ip) ||
+    request.headers.get('x-nf-client-connection-ip') ||
+    'unknown'
+  );
+}
+
+function attemptsKey(ip) {
+  return 'attempts-ip:' + encodeURIComponent(ip);
+}
+
+export async function checkLockout(ip) {
+  const record = await securityStore().get(attemptsKey(ip), { type: 'json' });
   if (record && record.lockedUntil && record.lockedUntil > Date.now()) {
     return Math.ceil((record.lockedUntil - Date.now()) / 1000);
   }
   return 0;
 }
 
-export async function registerFailedAttempt(username) {
+export async function registerFailedAttempt(ip) {
   const store = securityStore();
-  const key = 'attempts:' + username;
+  const key = attemptsKey(ip);
   const record = (await store.get(key, { type: 'json' })) || { count: 0 };
   record.count = (record.count || 0) + 1;
   if (record.count >= MAX_ATTEMPTS) {
@@ -79,8 +95,8 @@ export async function registerFailedAttempt(username) {
   await store.setJSON(key, record);
 }
 
-export async function clearAttempts(username) {
-  await securityStore().delete('attempts:' + username).catch(() => {});
+export async function clearAttempts(ip) {
+  await securityStore().delete(attemptsKey(ip)).catch(() => {});
 }
 
 export async function createSession(username) {

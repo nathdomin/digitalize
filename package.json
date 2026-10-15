@@ -1,7 +1,7 @@
 {
-  "name": "digikof-netlify",
+  "name": "digitalize",
   "version": "1.0.0",
-  "description": "DigiKof - digitalizacao e organizacao de documentos por pastas (Netlify Functions + Blobs)",
+  "description": "Digitalize - digitalizacao e organizacao de documentos por pastas (Netlify Functions + Blobs)",
   "type": "module",
   "scripts": {
     "dev": "netlify dev"

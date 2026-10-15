@@ -2,8 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>DigiKof — Digitalização de documentos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FAF8F7">
+<title>Digitalize — Digitalização de documentos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
@@ -11,8 +12,8 @@
 <body>
   <div class="login-screen" id="loginScreen">
     <form class="login-card" id="loginForm">
-      <h1>Digi<span>Kof</span></h1>
-      <p class="login-sub">Acesso restrito · KOF</p>
+      <h1>Digital<span>ize</span></h1>
+      <p class="login-sub">Acesso restrito</p>
       <label for="loginUser">Usuário</label>
       <input type="text" id="loginUser" autocomplete="username" required>
       <label for="loginPass">Senha</label>
@@ -25,8 +26,8 @@
   <div id="appShell" hidden>
     <header id="topbar">
       <div class="brand">
-        <h1>Digi<span>Kof</span></h1>
-        <small>documentos · KOF</small>
+        <h1>Digital<span>ize</span></h1>
+        <small>documentos digitalizados</small>
       </div>
       <div class="topbar-right">
         <div class="status" id="connStatus" aria-live="polite"></div>
@@ -61,6 +62,11 @@
         </div>
       </main>
     </div>
+
+    <button class="btn btn-primary fab" id="scanBtn" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V5a1 1 0 011-1h3M20 8V5a1 1 0 00-1-1h-3M4 16v3a1 1 0 001 1h3M20 16v3a1 1 0 01-1 1h-3"/><circle cx="12" cy="12" r="3"/></svg>
+      Digitalizar
+    </button>
   </div>
 
   <input type="file" id="fileInputCamera" accept="image/*" capture="environment">
